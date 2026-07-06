@@ -7,10 +7,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('Post API')
-    .setDescription('API para gerenciamento de posts')
+    .setTitle('EducaBlog API')
+    .setDescription('API para gerenciamento de blog educacional')
     .setVersion('1.0')
-    .addTag('posts')
     // .addBearerAuth()
     .build();
 
@@ -24,7 +23,18 @@ async function bootstrap() {
     }),
   );
 
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('docs', app, document, {
+    customSiteTitle: 'EducaBlog API',
+    swaggerOptions: {
+      docExpansion: 'none',
+      filter: true,
+      operationsSorter: 'alpha',
+      tagsSorter: 'alpha',
+      persistAuthorization: true,
+      tryItOutEnabled: true,
+      displayRequestDuration: true,
+    },
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }
