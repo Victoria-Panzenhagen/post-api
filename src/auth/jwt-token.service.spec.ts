@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { UserFactory } from '../../test/factories';
 import { JwtTokenService } from './jwt-token.service';
 
 describe('JwtTokenService', () => {
@@ -33,7 +34,11 @@ describe('JwtTokenService', () => {
   });
 
   it('should generate jwt token with three parts', () => {
-    const token = service.sign({ sub: 1, email: 'maria.silva@email.com' });
+    const user = UserFactory.create({
+      id: 1,
+      email: 'maria.silva@email.com',
+    });
+    const token = service.sign({ sub: user.id, email: user.email });
 
     expect(token.split('.')).toHaveLength(3);
   });

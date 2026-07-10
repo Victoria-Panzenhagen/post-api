@@ -1,7 +1,8 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { UserFactory } from '../../test/factories';
 import { PasswordService } from '../common/security/password.service';
-import { UserEntity } from '../user/entities/user.entity';
+import { UserResponseDto } from '../user/dto/response/user-response.dto';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { JwtTokenService } from './jwt-token.service';
@@ -19,7 +20,7 @@ describe('AuthService', () => {
     sign: jest.fn(),
   };
 
-  const user: UserEntity = {
+  const user = UserFactory.create({
     id: 1,
     name: 'Maria Silva',
     email: 'maria.silva@email.com',
@@ -27,7 +28,7 @@ describe('AuthService', () => {
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     updatedAt: new Date('2026-01-01T00:00:00.000Z'),
     deletedAt: null,
-  };
+  });
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -81,12 +82,7 @@ describe('AuthService', () => {
     expect(result).toEqual({
       accessToken: 'access-token',
       tokenType: 'Bearer',
-      user: {
-        id: 1,
-        name: 'Maria Silva',
-        email: 'maria.silva@email.com',
-        createdAt: user.createdAt,
-      },
+      user: new UserResponseDto(user),
     });
   });
 
