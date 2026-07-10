@@ -21,6 +21,19 @@ export class UpdateUserDto {
   name?: string;
 
   @ApiPropertyOptional({
+    description: 'E-mail do usuário',
+    example: 'maria.silva@email.com',
+  })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
+  @IsOptional()
+  @IsNotEmpty()
+  @IsEmail()
+  @MaxLength(150)
+  email?: string;
+
+  @ApiPropertyOptional({
     description: 'Senha do usuário',
     example: 'novaSenha123',
   })

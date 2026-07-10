@@ -11,15 +11,18 @@ import { PostEntity } from './entities/post.entity';
 import { PostResponseDto } from './dto/response/post-response.dto';
 import { ListPostDto } from './dto/list-post.dto';
 import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
+import { DisciplineEntity } from '../discipline/entities/discipline.entity';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(PostEntity)
     private readonly repository: Repository<PostEntity>,
+    @InjectRepository(DisciplineEntity)
+    private readonly disciplineRepository: Repository<DisciplineEntity>,
   ) {}
 
-  async create(createPostDto: CreatePostDto): Promise<PostEntity> {
+  async create(createPostDto: CreatePostDto): Promise<PostResponseDto> {
     const postExistente = await this.repository.findOne({
       where: { title: createPostDto.title },
     });
@@ -30,9 +33,23 @@ export class PostService {
       );
     }
 
-    const post = this.repository.create(createPostDto);
+    const discipline = await this.disciplineRepository.findOneBy({
+      id: createPostDto.disciplineId,
+    });
 
-    return this.repository.save(post);
+    if (!discipline) {
+      throw new NotFoundException('Disciplina não encontrada.');
+    }
+
+    const post = this.repository.create({
+      title: createPostDto.title,
+      content: createPostDto.content,
+      discipline,
+    });
+
+    const createdPost = await this.repository.save(post);
+
+    return new PostResponseDto(createdPost);
   }
 
   async findAll(
@@ -52,6 +69,9 @@ export class PostService {
 
     const [posts, total] = await this.repository.findAndCount({
       where: filtro,
+      relations: {
+        discipline: true,
+      },
       skip: (page - 1) * limit,
       take: limit,
       order: {
@@ -69,7 +89,12 @@ export class PostService {
   }
 
   async findOne(id: number): Promise<PostResponseDto> {
-    const post = await this.repository.findOneBy({ id });
+    const post = await this.repository.findOne({
+      where: { id },
+      relations: {
+        discipline: true,
+      },
+    });
     if (!post) {
       throw new NotFoundException('Post não encontrado.');
     }
@@ -96,7 +121,19 @@ export class PostService {
       );
     }
 
-    Object.assign(post, updatePostDto);
+    const discipline = await this.disciplineRepository.findOneBy({
+      id: updatePostDto.disciplineId,
+    });
+
+    if (!discipline) {
+      throw new NotFoundException('Disciplina não encontrada.');
+    }
+
+    Object.assign(post, {
+      title: updatePostDto.title,
+      content: updatePostDto.content,
+      discipline,
+    });
 
     const updatedPost = await this.repository.save(post);
 

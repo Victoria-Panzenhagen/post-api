@@ -1,11 +1,14 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
   DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
+import { DisciplineEntity } from '../../discipline/entities/discipline.entity';
 
 @Entity('post')
 export class PostEntity {
@@ -17,6 +20,10 @@ export class PostEntity {
 
   @Column()
   content!: string;
+
+  @ManyToOne(() => DisciplineEntity, { nullable: false })
+  @JoinColumn({ name: 'discipline_id' })
+  discipline!: DisciplineEntity;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
 
 export class CreatePostDto {
   @ApiProperty({ description: 'Título do post' })
@@ -11,4 +12,11 @@ export class CreatePostDto {
   @IsNotEmpty()
   @IsString()
   content!: string;
+
+  @ApiProperty({ description: 'Identificador da disciplina', example: 1 })
+  @Type(() => Number)
+  @IsNotEmpty()
+  @IsInt()
+  @Min(1)
+  disciplineId!: number;
 }

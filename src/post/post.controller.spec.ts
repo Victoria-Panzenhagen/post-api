@@ -3,6 +3,7 @@ import { PostController } from './post.controller';
 import { PostService } from './post.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PostEntity } from './entities/post.entity';
+import { DisciplineEntity } from '../discipline/entities/discipline.entity';
 
 describe('PostController', () => {
   let controller: PostController;
@@ -14,8 +15,13 @@ describe('PostController', () => {
     save: jest.fn(),
     softDelete: jest.fn(),
   };
+  const disciplineRepositoryMock = {
+    findOneBy: jest.fn(),
+  };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PostController],
       providers: [
@@ -23,6 +29,10 @@ describe('PostController', () => {
         {
           provide: getRepositoryToken(PostEntity),
           useValue: repositoryMock,
+        },
+        {
+          provide: getRepositoryToken(DisciplineEntity),
+          useValue: disciplineRepositoryMock,
         },
       ],
     }).compile();
