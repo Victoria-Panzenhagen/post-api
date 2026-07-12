@@ -180,10 +180,9 @@ describe('UserService', () => {
     expect(queryBuilderMock.addSelect).toHaveBeenCalledWith(
       'user.passwordHash',
     );
-    expect(queryBuilderMock.where).toHaveBeenCalledWith(
-      'user.email = :email',
-      { email: 'maria.silva@email.com' },
-    );
+    expect(queryBuilderMock.where).toHaveBeenCalledWith('user.email = :email', {
+      email: 'maria.silva@email.com',
+    });
     expect(result).toEqual(user);
   });
 
