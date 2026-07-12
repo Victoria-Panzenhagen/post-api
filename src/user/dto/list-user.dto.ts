@@ -1,0 +1,36 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
+import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+
+export class ListUserDto {
+  @ApiPropertyOptional({
+    example: 1,
+    default: 1,
+    description: 'Número da página.',
+  })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  page = 1;
+
+  @ApiPropertyOptional({
+    example: 10,
+    default: 10,
+    description: 'Quantidade de registros por página.',
+  })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit = 10;
+
+  @ApiPropertyOptional({
+    description: 'Busca por nome ou e-mail.',
+  })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsOptional()
+  @IsString()
+  search?: string;
+}
