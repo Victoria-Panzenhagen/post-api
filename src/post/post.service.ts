@@ -20,7 +20,7 @@ export class PostService {
     private readonly repository: Repository<PostEntity>,
     @InjectRepository(DisciplineEntity)
     private readonly disciplineRepository: Repository<DisciplineEntity>,
-  ) {}
+  ) {
 
   async create(createPostDto: CreatePostDto): Promise<PostResponseDto> {
     const postExistente = await this.repository.findOne({
