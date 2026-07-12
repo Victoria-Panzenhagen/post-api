@@ -1,10 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const configService = app.get(ConfigService);
+  const environment = configService.get<string>('NODE_ENV');
+  const port = configService.get<number>('APP_PORT') || 3000;
 
   app.setGlobalPrefix('api/v1');
 
@@ -38,6 +44,15 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(port);
+
+  const logger = new Logger('Bootstrap');
+
+  logger.log('========================================');
+  logger.log('🚀 Blog API started successfully');
+  logger.log(`🌍 Environment: ${environment}`);
+  logger.log(`📡 Port: ${port}`);
+  logger.log(`📖 Swagger: http://localhost:${port}/docs`);
+  logger.log('========================================');
 }
 bootstrap();
