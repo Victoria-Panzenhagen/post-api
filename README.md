@@ -349,14 +349,14 @@ O usuário autenticado é automaticamente associado ao post criado.
 
 ## Posts
 
-| Método | Endpoint | Descrição |
-|---------|----------|-----------|
-| GET | /posts | Lista todos os posts |
-| GET | /posts/:id | Busca um post |
-| POST | /posts | Cria um post |
-| PUT | /posts/:id | Atualiza um post |
-| DELETE | /posts/:id | Remove um post |
-| GET | /posts/search | Busca por palavras-chave |
+| Método | Endpoint      | Descrição                |
+| ------ | ------------- | ------------------------ |
+| GET    | /posts        | Lista todos os posts     |
+| GET    | /posts/:id    | Busca um post            |
+| POST   | /posts        | Cria um post             |
+| PUT    | /posts/:id    | Atualiza um post         |
+| DELETE | /posts/:id    | Remove um post           |
+| GET    | /posts/search | Busca por palavras-chave |
 
 ---
 
