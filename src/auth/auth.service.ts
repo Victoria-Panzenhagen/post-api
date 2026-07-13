@@ -4,14 +4,14 @@ import { UserResponseDto } from '../user/dto/response/user-response.dto';
 import { UserService } from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
 import { AuthResponseDto } from './dto/response/auth-response.dto';
-import { JwtTokenService } from './jwt-token.service';
+import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly passwordService: PasswordService,
-    private readonly jwtTokenService: JwtTokenService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
@@ -30,7 +30,7 @@ export class AuthService {
       throw new UnauthorizedException('E-mail ou senha inválidos.');
     }
 
-    const accessToken = this.jwtTokenService.sign({
+    const accessToken = this.jwtService.sign({
       sub: user.id,
       email: user.email,
     });

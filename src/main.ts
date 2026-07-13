@@ -17,7 +17,7 @@ async function bootstrap() {
     .setTitle('EducaBlog API')
     .setDescription('API para gerenciamento de blog educacional')
     .setVersion('1.0')
-    // .addBearerAuth()
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

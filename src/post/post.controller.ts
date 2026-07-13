@@ -16,6 +16,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
@@ -30,6 +31,10 @@ import {
 import { PostResponseDto } from './dto/response/post-response.dto';
 import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { ListPostDto } from './dto/list-post.dto';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -40,8 +45,8 @@ export class PostController {
   //● GET /post - Listagem de Todas as Postagens:
 
   @Post()
-  //@ApiBearerAuth()
-  //@UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Criar um post',
@@ -63,7 +68,12 @@ export class PostController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor.',
   })
-  create(@Body() createPostDto: CreatePostDto) {
+  create(
+    @Body() createPostDto: CreatePostDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const userId = user?.sub; // Use optional chaining to safely access the sub property
+    console.log('User ID:', userId); // Log the user ID for debugging
     return this.postService.create(createPostDto);
   }
 

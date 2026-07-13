@@ -1,3 +1,4 @@
+import { PostEntity } from 'src/post/entities/post.entity';
 import {
   Column,
   CreateDateColumn,
@@ -5,6 +6,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 @Entity('user')
@@ -29,4 +31,7 @@ export class UserEntity {
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt!: Date | null;
+
+  @OneToMany(() => PostEntity, (post) => post.author)
+  posts!: PostEntity[];
 }

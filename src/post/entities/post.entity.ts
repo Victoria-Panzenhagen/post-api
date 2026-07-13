@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { DisciplineEntity } from '../../discipline/entities/discipline.entity';
+import { UserEntity } from 'src/user/entities/user.entity';
 
 @Entity('post')
 export class PostEntity {
@@ -33,4 +34,8 @@ export class PostEntity {
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt!: Date | null;
+
+  @ManyToOne(() => UserEntity, (user) => user.posts)
+  @JoinColumn({ name: 'author_id' })
+  author!: UserEntity;
 }
