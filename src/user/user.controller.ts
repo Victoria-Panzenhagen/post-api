@@ -103,8 +103,8 @@ export class UserController {
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor.',
   })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.findOne(id);
+  findById(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findById(id);
   }
 
   @Put(':id')
