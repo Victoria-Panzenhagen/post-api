@@ -1,4 +1,4 @@
-import { PostEntity } from 'src/post/entities/post.entity';
+import { PostEntity } from '../../post/entities/post.entity';
 import {
   Column,
   CreateDateColumn,
@@ -32,6 +32,6 @@ export class UserEntity {
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt!: Date | null;
 
-  @OneToMany(() => PostEntity, (post) => post.author)
+  @OneToMany(() => PostEntity, (post) => post.user)
   posts!: PostEntity[];
 }

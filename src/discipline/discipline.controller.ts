@@ -27,7 +27,6 @@ export class DisciplineController {
     type: String,
   })
   findAll(@Query('name') name?: string) {
-    console.log(' ----------- ', name);
     return this.disciplineService.findAll(name);
   }
 }

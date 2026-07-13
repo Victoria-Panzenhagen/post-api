@@ -1,17 +1,19 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Not, Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { PostEntity } from './entities/post.entity';
 import { PostResponseDto } from './dto/response/post-response.dto';
 import { ListPostDto } from './dto/list-post.dto';
 import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { DisciplineEntity } from '../discipline/entities/discipline.entity';
+import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
 
 @Injectable()
 export class PostService {
@@ -22,7 +24,10 @@ export class PostService {
     private readonly disciplineRepository: Repository<DisciplineEntity>,
   ) {}
 
-  async create(createPostDto: CreatePostDto): Promise<PostResponseDto> {
+  async create(
+    createPostDto: CreatePostDto,
+    user: JwtPayload,
+  ): Promise<PostResponseDto> {
     const postExistente = await this.repository.findOne({
       where: { title: createPostDto.title },
     });
@@ -45,6 +50,7 @@ export class PostService {
       title: createPostDto.title,
       content: createPostDto.content,
       discipline,
+      user: { id: user.sub },
     });
 
     const createdPost = await this.repository.save(post);
@@ -54,30 +60,33 @@ export class PostService {
 
   async findAll(
     listPostDto: ListPostDto,
+    user?: JwtPayload,
   ): Promise<PaginatedResponseDto<PostResponseDto>> {
     const page = listPostDto.page ?? 1;
     const limit = listPostDto.limit ?? 10;
+    const userId = user?.sub ?? null;
     const search = listPostDto.search;
-    let filtro = {};
 
-    if (search) {
-      filtro = [
-        { title: ILike(`%${search}%`) },
-        { content: ILike(`%${search}%`) },
-      ];
+    const query = this.repository
+      .createQueryBuilder('post')
+      .innerJoinAndSelect('post.discipline', 'discipline')
+      .innerJoin('post.user', 'user')
+      .orderBy('post.createdAt', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    if (userId) {
+      query.andWhere('user.id = :userId', { userId });
     }
 
-    const [posts, total] = await this.repository.findAndCount({
-      where: filtro,
-      relations: {
-        discipline: true,
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+    if (search) {
+      query.andWhere(
+        '(post.title ILIKE :search OR post.content ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+
+    const [posts, total] = await query.getManyAndCount();
 
     return {
       total,
@@ -105,10 +114,17 @@ export class PostService {
   async update(
     id: number,
     updatePostDto: UpdatePostDto,
+    user: JwtPayload,
   ): Promise<PostResponseDto> {
-    const post = await this.repository.findOne({ where: { id: id } });
+    const post = await this.repository.findOneBy({ id });
     if (!post) {
       throw new NotFoundException('Post não encontrado.');
+    }
+
+    if (post.userId !== user.sub) {
+      throw new ForbiddenException(
+        'Você não tem permissão para editar este post.',
+      );
     }
 
     const postExistente = await this.repository.findOne({
@@ -140,10 +156,16 @@ export class PostService {
     return new PostResponseDto(updatedPost);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, user: JwtPayload): Promise<void> {
     const post = await this.repository.findOneBy({ id });
     if (!post) {
       throw new NotFoundException('Post não encontrado.');
+    }
+
+    if (post.userId !== user.sub) {
+      throw new ForbiddenException(
+        'Você não tem permissão para excluir este post.',
+      );
     }
 
     await this.repository.softDelete(id);

@@ -41,9 +41,6 @@ import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
-  //● GET /post/search - Busca de Posts:
-  //● GET /post - Listagem de Todas as Postagens:
-
   @Post()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
@@ -72,13 +69,14 @@ export class PostController {
     @Body() createPostDto: CreatePostDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    const userId = user?.sub; // Use optional chaining to safely access the sub property
-    console.log('User ID:', userId); // Log the user ID for debugging
-    return this.postService.create(createPostDto);
+    return this.postService.create(createPostDto, user);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar posts', description: 'Listagem de posts.' })
+  @ApiOperation({
+    summary: 'Listar posts',
+    description: 'Retorna todos os posts disponíveis para visualização.',
+  })
   @ApiOkResponse({
     type: PaginatedResponseDto,
   })
@@ -103,6 +101,71 @@ export class PostController {
     return this.postService.findAll(listPostDto);
   }
 
+  @Get('me')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Listar Minhas Postagens',
+    description:
+      'Retorna apenas as postagens criadas pelo professor autenticado para gerenciamento.',
+  })
+  @ApiOkResponse({
+    type: PaginatedResponseDto,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+  })
+  findAllAdmin(
+    @Query() listPostDto: ListPostDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.postService.findAll(listPostDto, user);
+  }
+
+  @Get('search')
+  @ApiOperation({
+    summary: 'Buscar Posts',
+    description:
+      'Retorna uma lista de posts cujo título ou conteúdo contenham o termo informado na query string.',
+  })
+  @ApiOkResponse({
+    type: PaginatedResponseDto,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+  })
+  findAllSearch(@Query() listPostDto: ListPostDto) {
+    return this.postService.findAll(listPostDto);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obter um post pelo ID' })
   @ApiParam({ name: 'id', example: 1, description: 'ID do post' })
@@ -124,6 +187,8 @@ export class PostController {
   }
 
   @Put(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({
     summary: 'Atualizar um post',
     description: 'Atualiza os dados de um post existente.',
@@ -154,11 +219,14 @@ export class PostController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
+    @CurrentUser() user: JwtPayload,
   ) {
-    return this.postService.update(id, updatePostDto);
+    return this.postService.update(id, updatePostDto, user);
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Remover um post' })
   @ApiParam({
     name: 'id',
@@ -180,7 +248,10 @@ export class PostController {
   @ApiNotFoundResponse({
     description: 'Post não encontrado.',
   })
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.postService.remove(id);
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.postService.remove(id, user);
   }
 }
