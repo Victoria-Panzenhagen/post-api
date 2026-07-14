@@ -187,6 +187,25 @@ cp .env.example .env
 
 Ajuste os valores conforme seu ambiente.
 
+## Configuração do `.env`
+
+### Executando localmente
+
+```env
+DB_HOST=localhost
+```
+
+### Executando com Docker Compose
+
+```env
+DB_HOST=postgres
+```
+
+O valor de `DB_HOST` depende do ambiente de execução:
+
+- `localhost`: quando a API é executada diretamente na máquina host.
+- `postgres`: quando a API é executada em um container Docker, utilizando a rede do Docker Compose.
+
 ---
 
 # Executando com Docker
@@ -224,8 +243,23 @@ Após a inicialização:
 | API | http://localhost:3000 |
 | Swagger | http://localhost:3000/docs |
 | PostgreSQL | localhost:5432 |
+| pgAdmin | http://localhost:5050 |
 
-> **Observação:** na primeira execução, aguarde a inicialização do banco de dados antes de utilizar a API.
+### Acesso ao pgAdmin
+
+Utilize as credenciais definidas no arquivo `.env`:
+
+```env
+PGADMIN_EMAIL=...
+PGADMIN_PASSWORD=...
+```
+
+> **Observações:**
+>
+> - Na primeira execução, aguarde a inicialização do banco de dados antes de utilizar a API.
+> - Ao executar a aplicação com Docker Compose, configure `DB_HOST=postgres`, pois os containers se comunicam pelo nome do serviço definido no `docker-compose.yml`.
+
+---
 
 ## Executando Localmente
 
