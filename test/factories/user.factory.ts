@@ -11,6 +11,7 @@ export class UserFactory {
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent(),
       deletedAt: null,
+      posts: [],
       ...overrides,
     };
   }

@@ -32,9 +32,9 @@ import { PostResponseDto } from './dto/response/post-response.dto';
 import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { ListPostDto } from './dto/list-post.dto';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { JwtPayload } from 'src/auth/interfaces/jwt-payload.interface';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
 @ApiTags('Posts')
 @Controller('posts')

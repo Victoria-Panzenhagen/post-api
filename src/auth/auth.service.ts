@@ -30,7 +30,7 @@ export class AuthService {
       throw new UnauthorizedException('E-mail ou senha inválidos.');
     }
 
-    const accessToken = this.jwtService.sign({
+    const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       email: user.email,
     });

@@ -5,7 +5,7 @@ import { PasswordService } from '../common/security/password.service';
 import { UserResponseDto } from '../user/dto/response/user-response.dto';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
-import { JwtTokenService } from './jwt-token.service';
+import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -17,7 +17,8 @@ describe('AuthService', () => {
     compare: jest.fn(),
   };
   const jwtTokenServiceMock = {
-    sign: jest.fn(),
+    signAsync: jest.fn().mockResolvedValue('fake-jwt-token'),
+    verifyAsync: jest.fn(),
   };
 
   const user = UserFactory.create({
@@ -45,7 +46,7 @@ describe('AuthService', () => {
           useValue: passwordServiceMock,
         },
         {
-          provide: JwtTokenService,
+          provide: JwtService,
           useValue: jwtTokenServiceMock,
         },
       ],
@@ -61,7 +62,7 @@ describe('AuthService', () => {
   it('should return access token and user when credentials are valid', async () => {
     userServiceMock.findByEmailWithPassword.mockResolvedValue(user);
     passwordServiceMock.compare.mockResolvedValue(true);
-    jwtTokenServiceMock.sign.mockReturnValue('access-token');
+    jwtTokenServiceMock.signAsync.mockResolvedValue('access-token');
 
     const result = await service.login({
       email: 'maria.silva@email.com',
@@ -75,7 +76,7 @@ describe('AuthService', () => {
       'senha123',
       'hashed-password',
     );
-    expect(jwtTokenServiceMock.sign).toHaveBeenCalledWith({
+    expect(jwtTokenServiceMock.signAsync).toHaveBeenCalledWith({
       sub: 1,
       email: 'maria.silva@email.com',
     });
