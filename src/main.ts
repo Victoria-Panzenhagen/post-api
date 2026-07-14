@@ -1,0 +1,61 @@
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  const configService = app.get(ConfigService);
+  const environment = configService.get<string>('NODE_ENV');
+  const port = configService.get<number>('APP_PORT') || 3000;
+
+  app.setGlobalPrefix('api/v1');
+
+  const config = new DocumentBuilder()
+    .setTitle('EducaBlog API')
+    .setDescription('API para gerenciamento de blog educacional')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // Remove propriedades não definidas no DTO
+      forbidNonWhitelisted: true, // Lança erro se houver propriedades não definidas no DTO
+      transform: true, // Transforma payloads para instâncias de DTO
+    }),
+  );
+
+  SwaggerModule.setup('docs', app, document, {
+    customSiteTitle: 'EducaBlog API',
+    swaggerOptions: {
+      docExpansion: 'none',
+      filter: true,
+      operationsSorter: 'alpha',
+      tagsSorter: 'alpha',
+      persistAuthorization: true,
+      tryItOutEnabled: true,
+      displayRequestDuration: true,
+    },
+  });
+
+  await app.listen(port);
+
+  const logger = new Logger('Bootstrap');
+
+  logger.log('========================================');
+  logger.log('🚀 Blog API started successfully');
+  logger.log(`🌍 Environment: ${environment}`);
+  logger.log(`📡 Port: ${port}`);
+  logger.log(`📖 Swagger: http://localhost:${port}/docs`);
+  logger.log('========================================');
+}
+
+bootstrap().catch((error) => {
+  console.error('Erro ao iniciar a aplicação:', error);
+  process.exit(1);
+});
