@@ -153,7 +153,7 @@ describe('UserService', () => {
 
     repositoryMock.findOneBy.mockResolvedValue(user);
 
-    const result = await service.findOne(1);
+    const result = await service.findById(1);
 
     expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: 1 });
     expect(result).toEqual(new UserResponseDto(user));
@@ -162,7 +162,7 @@ describe('UserService', () => {
   it('should throw NotFoundException when user is not found by id', async () => {
     repositoryMock.findOneBy.mockResolvedValue(null);
 
-    await expect(service.findOne(1)).rejects.toThrow(NotFoundException);
+    await expect(service.findById(1)).rejects.toThrow(NotFoundException);
   });
 
   it('should find user by email with password', async () => {
