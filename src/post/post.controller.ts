@@ -167,7 +167,10 @@ export class PostController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obter um post pelo ID' })
+  @ApiOperation({
+    summary: 'Obter um post pelo ID',
+    description: 'Retorna os detalhes de um post específico pelo seu ID.',
+  })
   @ApiParam({ name: 'id', example: 1, description: 'ID do post' })
   @ApiOkResponse({
     description: 'Post encontrado com sucesso.',
@@ -227,7 +230,10 @@ export class PostController {
   @Delete(':id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Remover um post' })
+  @ApiOperation({
+    summary: 'Remover um post',
+    description: 'Remove um post existente.',
+  })
   @ApiParam({
     name: 'id',
     description: 'Identificador do post.',
