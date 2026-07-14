@@ -4,6 +4,7 @@ import { DisciplineFactory } from '../../test/factories';
 import { DisciplineResponseDto } from './dto/response/discipline-response.dto';
 import { DisciplineEntity } from './entities/discipline.entity';
 import { DisciplineService } from './discipline.service';
+import { ILike } from 'typeorm';
 
 describe('DisciplineService', () => {
   let service: DisciplineService;
@@ -61,7 +62,7 @@ describe('DisciplineService', () => {
     const result = await service.findAll('Geografia');
 
     expect(repositoryMock.find).toHaveBeenCalledWith({
-      where: { name: 'Geografia' },
+      where: { name: ILike('%Geografia%') },
       order: {
         name: 'ASC',
       },
