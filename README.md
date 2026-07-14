@@ -9,73 +9,52 @@
 
 API REST desenvolvida durante o **Tech Challenge da Pós-Tech FIAP**.
 
-O projeto consiste em uma plataforma de blogging voltada ao ambiente educacional, permitindo que professores publiquem conteúdos e que alunos consultem as postagens.
-
-A aplicação foi desenvolvida utilizando **NestJS**, seguindo boas práticas de arquitetura, documentação, testes automatizados e conteinerização.
-
----
-
-# Sumário
-
-- [Objetivo](#objetivo)
-- [Tecnologias](#tecnologias)
-- [Arquitetura](#arquitetura)
-- [Funcionalidades](#funcionalidades)
-- [Modelo do Banco](#modelo-do-banco)
-- [Estrutura do Projeto](#estrutura-do-projeto)
-- [Instalação](#instalação)
-- [Variáveis de Ambiente](#variáveis-de-ambiente)
-- [Executando com Docker](#executando-com-docker)
-- [Executando Localmente](#executando-localmente)
-- [Documentação da API](#documentação-da-api)
-- [Autenticação](#autenticação)
-- [Endpoints](#endpoints)
-- [Testes](#testes)
-- [CI/CD](#cicd)
-- [Boas Práticas](#boas-práticas)
-- [Melhorias Futuras](#melhorias-futuras)
+A aplicação implementa uma plataforma de blogging voltada ao ambiente
+educacional, permitindo o gerenciamento de usuários, disciplinas e
+postagens. O projeto foi desenvolvido com foco em boas práticas de
+arquitetura, autenticação, documentação, testes automatizados e
+conteinerização.
 
 ---
 
-# Objetivo
+## Objetivo
 
-Construir uma API REST capaz de gerenciar postagens de um blog educacional.
+Disponibilizar uma API REST para gerenciamento de um blog educacional,
+oferecendo:
 
-A API oferece recursos para:
-
-- autenticação de usuários;
-- criação de postagens;
-- edição;
-- exclusão lógica;
-- pesquisa por palavras-chave;
-- documentação via Swagger.
+- Autenticação via JWT;
+- CRUD de usuários;
+- CRUD de disciplinas;
+- CRUD de postagens;
+- Associação automática do autor ao post através do usuário
+  autenticado;
+- Pesquisa por palavras-chave;
+- Paginação;
+- Documentação via Swagger;
+- Testes automatizados.
 
 ---
 
-# Tecnologias
+## Tecnologias
 
-## Backend
+### Backend
 
 - Node.js
 - NestJS
 - TypeScript
 
-## Banco de dados
+### Banco de Dados
 
 - PostgreSQL
 - TypeORM
 
-## Documentação
-
-- Swagger
-
-## Qualidade
+### Qualidade
 
 - Jest
 - ESLint
 - Prettier
 
-## Infraestrutura
+### Infraestrutura
 
 - Docker
 - Docker Compose
@@ -83,29 +62,32 @@ A API oferece recursos para:
 
 ---
 
-# Arquitetura
+## Arquitetura
 
-A aplicação segue uma arquitetura em camadas.
+A aplicação segue arquitetura em camadas.
 
 ```text
-                HTTP Request
-                      │
-              PostsController
-                      │
-                PostsService
-                      │
-             PostsRepository
-                      │
-                 PostgreSQL
+HTTP Request
+     │
+Validation Pipe
+     |     
+Controllers
+     │
+Services
+     │
+Repositories
+     │
+PostgreSQL
 ```
 
-Cada módulo possui responsabilidade única.
+Estrutura principal:
 
 ```text
 src
 ├── auth
-├── users
-├── posts
+├── user
+├── post
+├── discipline
 ├── common
 ├── config
 └── database
@@ -113,103 +95,81 @@ src
 
 ---
 
-# Funcionalidades
+# Estrutura da API
 
-## Usuários
+A aplicação está organizada em módulos independentes, cada um com uma responsabilidade específica.
 
-- Cadastro
-- Login
-- Autenticação JWT
-
-## Posts
-
-- Criar postagem
-- Atualizar postagem
-- Excluir postagem (Soft Delete)
-- Buscar postagem por ID
-- Listar postagens
-- Buscar por palavra-chave
+| Módulo | Responsabilidade |
+|--------|------------------|
+| **Auth** | Autenticação de usuários e geração de tokens JWT. |
+| **User** | Cadastro, consulta, atualização e exclusão de usuários. |
+| **Post** | Gerenciamento de postagens, busca por palavras-chave, paginação e associação automática do autor autenticado. |
+| **Discipline** | Gerenciamento das disciplinas utilizadas pelas postagens. |
+| **Common** | Componentes compartilhados, como DTOs e serviços reutilizáveis. |
+| **Config** | Configurações da aplicação, banco de dados e autenticação. |
+| **Database** | Migrations, seeds e configuração do TypeORM. |
 
 ---
 
-# Modelo do Banco
+## Funcionalidades
+
+### Autenticação
+- [x] Login com JWT
+- [x] Rotas protegidas
+
+### Usuários
+- [x] CRUD de usuários
+
+### Postagens
+- [x] CRUD de postagens
+- [x] Exclusão lógica (Soft Delete)
+- [x] Busca por palavra-chave
+- [x] Paginação
+- [x] Apenas o autor pode editar ou excluir sua postagem
+- [x] Autor obtido automaticamente a partir do token JWT
+- [x] Associação obrigatória a uma disciplina
+
+### Disciplinas
+- [x] Listagem de disciplinas
+
+---
+
+# Regras de Negócio
+
+A API implementa as seguintes regras de negócio:
+
+- Apenas usuários autenticados podem criar postagens.
+- O autor da postagem é definido automaticamente com base no usuário autenticado via JWT.
+- Apenas o autor da postagem pode editá-la ou excluí-la.
+- Toda postagem deve estar associada a uma disciplina válida.
+- Usuários e postagens utilizam exclusão lógica (Soft Delete), preservando o histórico de dados.
+- Não é permitido cadastrar usuários com e-mails duplicados.
+- Não é permitido cadastrar ou atualizar postagens com títulos duplicados.
+
+---
+
+## Modelo do Banco
 
 ```text
-User
-----
-id
-name
-email
-password
-createdAt
-updatedAt
-
-          1
-          │
-          │
-          │
-          N
-
-Post
-----
-id
-title
-content
-createdAt
-updatedAt
-deletedAt
-authorId
+User (1) ──────────────── (N) Post (N) ──────────────── (1) Discipline
 ```
 
-Cada postagem pertence a um único usuário.
+Cada postagem pertence a um usuário e a uma disciplina.
 
-O autor é obtido automaticamente através do usuário autenticado via JWT.
+O autor é definido automaticamente pelo usuário autenticado via JWT.
 
 ---
 
-# Estrutura do Projeto
+## Instalação
 
-```text
-src
-│
-├── auth
-│
-├── users
-│
-├── posts
-│   ├── dto
-│   ├── entities
-│   ├── repositories
-│   ├── services
-│   ├── controllers
-│   └── tests
-│
-├── common
-│
-├── config
-│
-├── database
-│
-└── main.ts
-```
-
----
-
-# Instalação
-
-Clone o projeto
+Clone o projeto:
 
 ```bash
 git clone https://github.com/Victoria-Panzenhagen/post-api.git
+cd post-api
 ```
 
-Entre na pasta
-
-```bash
-cd blog-api
-```
-
-Instale as dependências
+Instale as dependências:
 
 ```bash
 npm install
@@ -217,245 +177,345 @@ npm install
 
 ---
 
-# Variáveis de Ambiente
+## Variáveis de Ambiente
 
-Crie um arquivo:
+Copie o arquivo de exemplo:
 
-```text
-.env
+```bash
+cp .env.example .env
 ```
 
-Exemplo:
-
-```env
-APP_PORT=3000
-
-DB_HOST=localhost
-DB_PORT=5432
-DB_DATABASE=blog
-DB_SCHEMA=blog
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-
-JWT_SECRET=your-secret
-JWT_EXPIRES_IN=1d
-```
+Ajuste os valores conforme seu ambiente.
 
 ---
 
 # Executando com Docker
 
-Subir containers
+A aplicação pode ser executada utilizando Docker Compose, que inicializa automaticamente os containers da API e do PostgreSQL.
+
+Subir os containers:
 
 ```bash
 docker compose up --build
 ```
 
-Parar containers
+Executar em segundo plano:
+
+```bash
+docker compose up -d
+```
+
+Parar os containers:
 
 ```bash
 docker compose down
 ```
 
----
+Remover containers, redes e volumes:
 
-# Executando Localmente
+```bash
+docker compose down -v
+```
 
-Modo desenvolvimento
+Após a inicialização:
+
+| Serviço | URL |
+|---------|-----|
+| API | http://localhost:3000 |
+| Swagger | http://localhost:3000/docs |
+| PostgreSQL | localhost:5432 |
+
+> **Observação:** na primeira execução, aguarde a inicialização do banco de dados antes de utilizar a API.
+
+## Executando Localmente
 
 ```bash
 npm run start:dev
 ```
 
-Build
-
-```bash
-npm run build
-```
-
-Produção
-
-```bash
-npm run start:prod
-```
-
 ---
 
-# Banco de Dados
+## Banco de Dados
 
-Executar migrations
+Executar migrations:
 
 ```bash
 npm run migration:run
 ```
 
-Executar seeds
+Executar seeds:
 
 ```bash
 npm run seed
 ```
 
+As migrations criam a estrutura do banco e as seeds inserem os dados
+iniciais da aplicação, como as disciplinas.
+
+------------------------------------------------------------------------
+
+# Primeiros Passos
+
+Após iniciar a aplicação, siga o fluxo abaixo para utilizar os endpoints protegidos.
+
+## 1. Criar um usuário
+
+Utilize o endpoint:
+
+```http
+POST /users
+```
+
+Exemplo de requisição:
+
+```json
+{
+  "name": "Maria Silva",
+  "email": "maria.silva@email.com",
+  "password": "senha123"
+}
+```
+
+## 2. Realizar o login
+
+Utilize o endpoint:
+
+```http
+POST /auth/login
+```
+
+Exemplo de requisição:
+
+```json
+{
+  "email": "maria.silva@email.com",
+  "password": "senha123"
+}
+```
+
+A resposta retornará um token JWT:
+
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIs..."
+}
+```
+
+## 3. Autorizar as requisições
+
+No Swagger, clique em **Authorize** e informe o token no seguinte formato:
+
+```text
+Bearer <seu_token>
+```
+
+Após a autenticação, todos os endpoints protegidos poderão ser utilizados.
+
+> **Observação:** ao criar uma postagem, o autor é associado automaticamente ao usuário autenticado. Não é necessário informar o autor na requisição.
+
 ---
 
-# Documentação da API
+## Documentação
 
 Após iniciar a aplicação:
 
-```
+``` text
 http://localhost:3000/docs
-```
+````
 
-A documentação é gerada automaticamente utilizando Swagger.
+A documentação Swagger contém:
 
-Ela contém:
-
-- endpoints;
-- DTOs;
-- exemplos de requisição;
-- exemplos de resposta;
-- códigos HTTP.
+- Endpoints
+- DTOs
+- Exemplos de requisição
+- Exemplos de resposta
+- Códigos HTTP
 
 ---
 
-# Autenticação
+## Autenticação
 
-A API utiliza JWT.
-
-Fluxo:
+Fluxo de autenticação:
 
 ```text
-Login
-     │
-     ▼
-JWT
-     │
-     ▼
+Cadastro de usuário
+          │
+          ▼
+     POST /users
+          │
+          ▼
+     POST /auth/login
+          │
+          ▼
+     Access Token (JWT)
+          │
+          ▼
 Authorization: Bearer <token>
-     │
-     ▼
+          │
+          ▼
 Usuário autenticado
-     │
-     ▼
-Autor da postagem
+          │
+          ▼
+Autor definido automaticamente
 ```
-
-O cliente **não informa o autor da postagem**.
-
-O usuário autenticado é automaticamente associado ao post criado.
 
 ---
 
-# Endpoints
+## Endpoints
 
-## Posts
+### Auth
 
-| Método | Endpoint      | Descrição                |
-| ------ | ------------- | ------------------------ |
-| GET    | /posts        | Lista todos os posts     |
-| GET    | /posts/:id    | Busca um post            |
-| POST   | /posts        | Cria um post             |
-| PUT    | /posts/:id    | Atualiza um post         |
-| DELETE | /posts/:id    | Remove um post           |
-| GET    | /posts/search | Busca por palavras-chave |
+Método Endpoint
 
 ---
 
-# Testes
+POST /auth/login
 
-Executar testes
+### Usuários
+
+Método Endpoint
+
+---
+
+POST /users
+GET /users
+GET /users/:id
+PUT /users/:id
+DELETE /users/:id
+
+### Disciplinas
+
+Método Endpoint
+
+---
+
+POST /disciplines
+GET /disciplines
+GET /disciplines/:id
+PUT /disciplines/:id
+DELETE /disciplines/:id
+
+### Posts
+
+Método Endpoint
+
+---
+
+POST /posts
+GET /posts
+GET /posts/:id
+PUT /posts/:id
+DELETE /posts/:id
+
+---
+
+## Testes
 
 ```bash
-npm run test
-```
-
-Cobertura
-
-```bash
+npm test
 npm run test:cov
 ```
 
-O projeto possui testes unitários para os principais casos de uso da aplicação.
+Cobertura atual aproximada:
+
+- Statements: 66%
+- Branches: 68%
+- Lines: 67%
 
 ---
 
-# CI/CD
+## CI/CD
 
-O projeto utiliza GitHub Actions para automatizar:
-
-- instalação das dependências;
-- execução do lint;
-- execução dos testes;
-- build da aplicação.
-
-Fluxo:
+A pipeline do GitHub Actions executa automaticamente:
 
 ```text
-Push
-
- ↓
-
 Install
-
- ↓
-
+   ↓
 Lint
-
- ↓
-
+   ↓
 Tests
-
- ↓
-
+   ↓
 Build
 ```
 
+Nenhuma alteração é integrada caso alguma dessas etapas falhe.
+
 ---
 
-# Boas Práticas
+## Boas Práticas
 
 - Arquitetura em camadas
-- DTOs
-- Validação com class-validator
+- DTOs e validação
+- JWT
 - Soft Delete
-- Injeção de Dependência
 - Repository Pattern
+- Dependency Injection
 - Swagger
 - Docker
+- GitHub Actions
 - ESLint
 - Prettier
-- Variáveis de ambiente
-- JWT
 - Testes Unitários
 
 ---
 
-# Melhorias Futuras
+# Experiência e Desafios
 
-- Refresh Token
-- Controle de permissões (RBAC)
-- Upload de imagens
-- Paginação
-- Filtros avançados
-- Cache com Redis
-- Observabilidade
-- Rate Limiting
+Durante o desenvolvimento deste projeto, alguns desafios contribuíram significativamente para o aprendizado e evolução técnica.
+
+### Testes Unitários
+
+A implementação dos testes exigiu a adaptação da suíte de testes à evolução da aplicação, principalmente após a inclusão da autenticação JWT e das regras de autorização.
+
+Entre os principais desafios estiveram:
+
+- Atualização dos mocks dos repositórios e serviços;
+- Simulação do usuário autenticado através do `JwtPayload`;
+- Testes de regras de autorização, garantindo que apenas o autor da postagem possa atualizá-la ou removê-la;
+- Adequação dos testes ao uso do `QueryBuilder` do TypeORM;
+- Manutenção da cobertura de testes acima do mínimo exigido.
+
+### Integração Contínua (GitHub Actions)
+
+Outro desafio foi configurar a pipeline de integração contínua para validar automaticamente a qualidade do projeto.
+
+A pipeline foi configurada para executar:
+
+- Instalação das dependências;
+- Verificação de formatação com Prettier;
+- Análise estática com ESLint;
+- Execução dos testes unitários;
+- Build da aplicação.
+
+Durante essa etapa foram corrigidos diversos problemas relacionados à tipagem do TypeScript, regras do ESLint e configuração dos testes, garantindo que todas as validações fossem executadas com sucesso em cada push realizado ao repositório.
+
+Esses desafios contribuíram para uma melhor compreensão das boas práticas de desenvolvimento, qualidade de código, automação e manutenção de aplicações backend utilizando NestJS.
 
 ---
 
-# Desenvolvido por
+## Melhorias Futuras
 
-Victoria Panzenhagen
+- Refresh Token
+- RBAC
+- Upload de imagens
+- Cache com Redis
+- Rate Limiting
+- Observabilidade
+- Logs estruturados
+
+---
+
+## Desenvolvido por
+
+**Victoria Panzenhagen**
 
 Backend Developer
 
-GitHub:
-https://github.com/Victoria-Panzenhagen
-
-LinkedIn:
-https://linkedin.com/in/victoria-panzenhagen-a5ab69196
+- GitHub: https://github.com/Victoria-Panzenhagen
+- LinkedIn: https://linkedin.com/in/victoria-panzenhagen-a5ab69196
 
 ---
 
-# Licença
+## Licença
 
 Este projeto está licenciado sob a licença MIT.
