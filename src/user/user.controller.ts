@@ -88,7 +88,10 @@ export class UserController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obter um usuário pelo ID' })
+  @ApiOperation({
+    summary: 'Obter um usuário pelo ID',
+    description: 'Retorna os detalhes de um usuário específico pelo seu ID.',
+  })
   @ApiParam({ name: 'id', example: 1, description: 'ID do usuário' })
   @ApiOkResponse({
     description: 'Usuário encontrado com sucesso.',
@@ -140,7 +143,10 @@ export class UserController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Remover um usuário' })
+  @ApiOperation({
+    summary: 'Remover um usuário',
+    description: 'Remove um usuário existente.',
+  })
   @ApiParam({
     name: 'id',
     description: 'Identificador do usuário.',
