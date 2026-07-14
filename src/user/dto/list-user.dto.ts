@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { Transform, TransformFnParams, Type } from 'class-transformer';
 import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class ListUserDto {
@@ -29,7 +29,9 @@ export class ListUserDto {
   @ApiPropertyOptional({
     description: 'Busca por nome ou e-mail.',
   })
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @Transform(({ value }: TransformFnParams): string =>
+    typeof value === 'string' ? value.trim() : String(value),
+  )
   @IsOptional()
   @IsString()
   search?: string;

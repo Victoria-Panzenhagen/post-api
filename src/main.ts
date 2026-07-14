@@ -54,4 +54,8 @@ async function bootstrap() {
   logger.log(`📖 Swagger: http://localhost:${port}/docs`);
   logger.log('========================================');
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('Erro ao iniciar a aplicação:', error);
+  process.exit(1);
+});

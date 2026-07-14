@@ -1,10 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Transform, TransformFnParams } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({ description: 'Nome do usuário', example: 'Maria Silva' })
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @Transform(({ value }: TransformFnParams): string =>
+    typeof value === 'string' ? value.trim() : String(value),
+  )
   @IsNotEmpty()
   @IsString()
   @MaxLength(100)
@@ -14,8 +16,8 @@ export class CreateUserDto {
     description: 'E-mail do usuário',
     example: 'maria.silva@email.com',
   })
-  @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  @Transform(({ value }: TransformFnParams): string =>
+    typeof value === 'string' ? value.trim().toLowerCase() : String(value),
   )
   @IsNotEmpty()
   @IsEmail()

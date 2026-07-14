@@ -16,4 +16,7 @@ async function seed(): Promise<void> {
   }
 }
 
-seed();
+seed().catch((error) => {
+  console.error('Erro ao iniciar a execução das seeds:', error);
+  process.exit(1);
+});
