@@ -1,0 +1,71 @@
+services:
+  api:
+    container_name: blog-api
+
+    build:
+      context: .
+      target: development
+
+    ports:
+      - '3000:3000'
+
+    env_file:
+      - .env
+
+    entrypoint: ['/usr/local/bin/docker-entrypoint.sh']
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+    restart: 'no'
+
+  postgres:
+    container_name: blog-db
+
+    image: postgres:16-alpine
+
+    ports:
+      - '5432:5432'
+
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    container_name: pgadmin
+
+    image: dpage/pgadmin4:latest
+
+    ports:
+      - '5050:80'
+
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_data:
+  pgadmin_data:
