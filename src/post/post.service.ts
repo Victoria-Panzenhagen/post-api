@@ -70,7 +70,7 @@ export class PostService {
     const query = this.repository
       .createQueryBuilder('post')
       .innerJoinAndSelect('post.discipline', 'discipline')
-      .innerJoin('post.user', 'user')
+      .innerJoinAndSelect('post.user', 'user')
       .orderBy('post.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
@@ -102,6 +102,7 @@ export class PostService {
       where: { id },
       relations: {
         discipline: true,
+        user: true,
       },
     });
     if (!post) {
