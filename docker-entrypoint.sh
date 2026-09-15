@@ -1,12 +1,8 @@
 #!/bin/sh
 
-set -x
+set -e
 
-echo "Aguardando banco..."
-
-until nc -z "$DB_HOST" "$DB_PORT"; do
-  sleep 1
-done
+echo "Banco disponível!"
 
 echo "Executando migrations..."
 npm run migration:run
@@ -16,5 +12,3 @@ npm run seed
 
 echo "Iniciando aplicação..."
 exec npm run start:dev
-
-chmod +x docker-entrypoint.sh
