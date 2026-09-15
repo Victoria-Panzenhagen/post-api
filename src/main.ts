@@ -9,7 +9,8 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const environment = configService.get<string>('NODE_ENV');
-  const port = configService.get<number>('APP_PORT') || 3000;
+  const port = configService.get<number>('PORT') || 3001;
+  const origin = configService.get<string>('ORIGIN');
 
   app.setGlobalPrefix('api/v1');
 
@@ -29,6 +30,10 @@ async function bootstrap() {
       transform: true, // Transforma payloads para instâncias de DTO
     }),
   );
+
+  app.enableCors({
+    origin: origin,
+  });
 
   SwaggerModule.setup('docs', app, document, {
     customSiteTitle: 'EducaBlog API',

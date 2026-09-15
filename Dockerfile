@@ -23,7 +23,7 @@ COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-EXPOSE 3000
+EXPOSE 3001
 
 CMD ["npm", "run", "start:dev"]
 
@@ -51,10 +51,10 @@ RUN npm ci --omit=dev
 # Copia apenas a aplicação compilada
 COPY --from=builder /app/dist ./dist
 
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+#COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+#RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-EXPOSE 3000
+EXPOSE 3001
 
 CMD ["node", "dist/main.js"]
