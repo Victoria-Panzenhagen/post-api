@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { fromReadableStreamLike } from 'rxjs/internal/observable/innerFrom';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -32,7 +33,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: origin,
+    origin: origin || false,
   });
 
   SwaggerModule.setup('docs', app, document, {
