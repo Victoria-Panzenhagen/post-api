@@ -35,15 +35,20 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { UserRole } from '../user/enums/user-role.enum';
+import { ApiForbiddenResponse } from '@nestjs/swagger';
 
 @ApiTags('Posts')
 @Controller('posts')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+  constructor(private readonly postService: PostService) { }
 
   @Post()
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PROFESSOR)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Criar um post',
@@ -64,6 +69,9 @@ export class PostController {
   })
   @ApiInternalServerErrorResponse({
     description: 'Erro interno do servidor.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Usuário não possui permissão para realizar esta ação.',
   })
   create(
     @Body() createPostDto: CreatePostDto,
@@ -103,7 +111,8 @@ export class PostController {
 
   @Get('me')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PROFESSOR)
   @ApiOperation({
     summary: 'Listar Minhas Postagens',
     description:
@@ -128,6 +137,9 @@ export class PostController {
     name: 'search',
     required: false,
     type: String,
+  })
+  @ApiForbiddenResponse({
+    description: 'Usuário não possui permissão para realizar esta ação.',
   })
   findAllAdmin(
     @Query() listPostDto: ListPostDto,
@@ -191,7 +203,8 @@ export class PostController {
 
   @Put(':id')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PROFESSOR)
   @ApiOperation({
     summary: 'Atualizar um post',
     description: 'Atualiza os dados de um post existente.',
@@ -219,6 +232,9 @@ export class PostController {
   @ApiNotFoundResponse({
     description: 'Post não encontrado.',
   })
+  @ApiForbiddenResponse({
+    description: 'Usuário não possui permissão para realizar esta ação.',
+  })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
@@ -229,7 +245,8 @@ export class PostController {
 
   @Delete(':id')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.PROFESSOR)
   @ApiOperation({
     summary: 'Remover um post',
     description: 'Remove um post existente.',
@@ -253,6 +270,9 @@ export class PostController {
   })
   @ApiNotFoundResponse({
     description: 'Post não encontrado.',
+  })
+  @ApiForbiddenResponse({
+    description: 'Usuário não possui permissão para realizar esta ação.',
   })
   remove(
     @Param('id', ParseIntPipe) id: number,

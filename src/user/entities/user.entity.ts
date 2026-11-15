@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { UserRole } from '../enums/user-role.enum';
 
 @Entity('user')
 export class UserEntity {
@@ -22,6 +23,13 @@ export class UserEntity {
 
   @Column({ name: 'password_hash', select: false })
   passwordHash!: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.ALUNO,
+  })
+  role!: UserRole;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
