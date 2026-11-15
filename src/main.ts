@@ -48,8 +48,8 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(port);
-
+  await app.listen(port, '0.0.0.0');
+  console.log(`🚀 Blog API started successfully on port ${port}`);
   const logger = new Logger('Bootstrap');
 
   logger.log('========================================');
