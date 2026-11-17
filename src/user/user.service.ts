@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Not, Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, Not, Repository } from 'typeorm';
 import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ListUserDto } from './dto/list-user.dto';
@@ -12,6 +12,8 @@ import { UserResponseDto } from './dto/response/user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { PasswordService } from '../common/security/password.service';
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { UserRole } from './enums/user-role.enum';
 
 @Injectable()
 export class UserService {
@@ -49,16 +51,25 @@ export class UserService {
 
   async findAll(
     listUserDto: ListUserDto,
+    currentUser?: JwtPayload,
   ): Promise<PaginatedResponseDto<UserResponseDto>> {
     const page = listUserDto.page ?? 1;
     const limit = listUserDto.limit ?? 10;
     const search = listUserDto.search;
-    let filtro = {};
+    const isAluno = currentUser?.role === UserRole.ALUNO;
+    let filtro: FindOptionsWhere<UserEntity> | FindOptionsWhere<UserEntity>[] =
+      isAluno ? { role: UserRole.ALUNO } : {};
 
     if (search) {
       filtro = [
-        { name: ILike(`%${search}%`) },
-        { email: ILike(`%${search}%`) },
+        {
+          ...(isAluno ? { role: UserRole.ALUNO } : {}),
+          name: ILike(`%${search}%`),
+        },
+        {
+          ...(isAluno ? { role: UserRole.ALUNO } : {}),
+          email: ILike(`%${search}%`),
+        },
       ];
     }
 
@@ -67,7 +78,7 @@ export class UserService {
       skip: (page - 1) * limit,
       take: limit,
       order: {
-        createdAt: 'DESC',
+        name: 'DESC',
       },
     });
 
