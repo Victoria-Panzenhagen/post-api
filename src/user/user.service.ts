@@ -78,7 +78,7 @@ export class UserService {
       skip: (page - 1) * limit,
       take: limit,
       order: {
-        name: 'DESC',
+        name: 'ASC',
       },
     });
 
