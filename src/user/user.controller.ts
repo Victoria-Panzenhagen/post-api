@@ -29,6 +29,8 @@ import { ListUserDto } from './dto/list-user.dto';
 import { UserResponseDto } from './dto/response/user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 
 @ApiTags('Users')
 @Controller('users')
@@ -83,8 +85,11 @@ export class UserController {
     required: false,
     type: String,
   })
-  findAll(@Query() listUserDto: ListUserDto) {
-    return this.userService.findAll(listUserDto);
+  findAll(
+    @Query() listUserDto: ListUserDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.userService.findAll(listUserDto, user);
   }
 
   @Get(':id')
